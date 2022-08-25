@@ -11,10 +11,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.xuxuxiaoweather.R
+import com.example.xuxuxiaoweather.ui.weather.WeatherActivity
 import kotlinx.android.synthetic.main.fragment_place.*
 
 class PlaceFragment : Fragment() {
-    private val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
+     val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
     private lateinit var adapter: PlaceAdapter
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,8 +29,20 @@ class PlaceFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
-        adapter = PlaceAdapter(this,viewModel.placeList)
+        adapter = if (viewModel.isPlaceSaved() && viewModel.placeList.size == 0){
+            val savedplace = viewModel.getSavedPlace()
+            viewModel.savableList.clear()
+            viewModel.savableList.addAll(savedplace.places)
+            recyclerView.visibility = View.VISIBLE
+            bgImageView.visibility = View.GONE
+            PlaceAdapter(this,viewModel.savableList)
+
+        }else{
+            PlaceAdapter(this,viewModel.placeList)
+        }
+
         recyclerView.adapter = adapter
+
         searchPlaceEdit.addTextChangedListener { editable ->
             val content = editable.toString()
             if (content.isNotEmpty()){
@@ -48,6 +61,7 @@ class PlaceFragment : Fragment() {
                 bgImageView.visibility = View.GONE
                 viewModel.placeList.clear()
                 viewModel.placeList.addAll(places)
+                adapter.placeslist = viewModel.placeList
                 adapter.notifyDataSetChanged()
             }else{
                 Toast.makeText(activity,"未查询到任何地点",Toast.LENGTH_SHORT).show()
