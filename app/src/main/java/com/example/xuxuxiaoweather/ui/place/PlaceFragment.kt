@@ -1,6 +1,7 @@
 package com.example.xuxuxiaoweather.ui.place
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,7 @@ class PlaceFragment : Fragment() {
             viewModel.savableList.addAll(savedplace.places)
             recyclerView.visibility = View.VISIBLE
             bgImageView.visibility = View.GONE
+            Log.d("Tag",viewModel.savableList.toString())
             PlaceAdapter(this,viewModel.savableList)
 
         }else{
@@ -48,10 +50,14 @@ class PlaceFragment : Fragment() {
             if (content.isNotEmpty()){
                 viewModel.searchPlaces(content)
             }else{
-                recyclerView.visibility = View.GONE
-                bgImageView.visibility = View.VISIBLE
-                viewModel.placeList.clear()
-                adapter.notifyDataSetChanged()
+                if (viewModel.savableList.size == 0){
+                    recyclerView.visibility = View.GONE
+                    bgImageView.visibility = View.VISIBLE
+                    viewModel.placeList.clear()
+                    adapter.notifyDataSetChanged()
+                }
+
+
             }
         }
         viewModel.placeLiveData.observe(this, Observer { result ->
